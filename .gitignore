@@ -1,0 +1,17 @@
+# Secrets — never commit
+esphome/secrets.yaml
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log

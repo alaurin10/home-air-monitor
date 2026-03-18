@@ -1,0 +1,32 @@
+- id: purifier_voc_on
+  alias: "Kitchen Purifier — Turn On (High VOC)"
+  description: >
+    Turns on the kitchen air purifier when VOC index rises above 150.
+    The SGP40 VOC index is relative (100 = normal baseline). Above 150 indicates
+    elevated cooking fumes or other VOC sources.
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.kitchen_voc_index
+      above: 150
+  actions:
+    - action: switch.turn_on
+      target:
+        entity_id: switch.kitchen_purifier
+  mode: single
+
+- id: purifier_voc_off
+  alias: "Kitchen Purifier — Turn Off (VOC Normalized)"
+  description: >
+    Turns off the kitchen air purifier when VOC index stays below 80
+    for 10 consecutive minutes. The delay prevents rapid on/off cycling.
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.kitchen_voc_index
+      below: 80
+      for:
+        minutes: 10
+  actions:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.kitchen_purifier
+  mode: single

@@ -1,0 +1,62 @@
+esphome:
+  name: kitchen-sensor
+  friendly_name: Kitchen Sensor
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: arduino
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "Kitchen Sensor Fallback"
+    password: "fallback123"
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+logger:
+
+i2c:
+  sda: GPIO6
+  scl: GPIO7
+  scan: true
+
+sensor:
+  - platform: scd4x
+    co2:
+      name: "Kitchen CO2"
+      id: kitchen_co2
+    temperature:
+      name: "Kitchen Temperature"
+      id: kitchen_temp
+      filters:
+        - offset: -2.0  # Self-heating compensation — fine-tune after comparing to a reference thermometer
+    humidity:
+      name: "Kitchen Humidity"
+      id: kitchen_humidity
+    address: 0x62
+    update_interval: 60s
+
+  - platform: sgp4x
+    voc:
+      name: "Kitchen VOC Index"
+      id: kitchen_voc_index
+    compensation:
+      temperature_source: kitchen_temp
+      humidity_source: kitchen_humidity
+    update_interval: 60s
+
+light:
+  - platform: status_led
+    name: "Status LED"
+    pin:
+      number: GPIO8
+      inverted: true

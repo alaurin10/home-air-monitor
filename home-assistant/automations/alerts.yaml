@@ -1,0 +1,130 @@
+# CO2 Alert Automations
+#
+# Sends push notifications via the Home Assistant companion app.
+# notify.notify broadcasts to all registered mobile devices.
+#
+# Rate limiting: each automation uses "mode: single" and a cooldown condition
+# so it won't re-trigger more than once per hour per room.
+
+# --- Bedroom ---
+
+- id: alert_co2_elevated_bedroom
+  alias: "Alert — Bedroom CO2 Elevated (1000 ppm)"
+  description: Push notification when bedroom CO2 rises above 1000 ppm. Max once per hour.
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.bedroom_co2
+      above: 1000
+  conditions:
+    - condition: template
+      value_template: >
+        {{ (as_timestamp(now()) - as_timestamp(this.attributes.last_triggered | default('1970-01-01T00:00:00+00:00'))) > 3600 }}
+  actions:
+    - action: notify.notify
+      data:
+        title: "Air Quality — Bedroom"
+        message: "CO2 is elevated at {{ states('sensor.bedroom_co2') | int }} ppm. Consider opening a window."
+  mode: single
+
+- id: alert_co2_urgent_bedroom
+  alias: "Alert — Bedroom CO2 Urgent (1500 ppm)"
+  description: Urgent push notification when bedroom CO2 exceeds 1500 ppm. Max once per hour.
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.bedroom_co2
+      above: 1500
+  conditions:
+    - condition: template
+      value_template: >
+        {{ (as_timestamp(now()) - as_timestamp(this.attributes.last_triggered | default('1970-01-01T00:00:00+00:00'))) > 3600 }}
+  actions:
+    - action: notify.notify
+      data:
+        title: "⚠️ Air Quality — Bedroom"
+        message: "CO2 is very high at {{ states('sensor.bedroom_co2') | int }} ppm. Open windows immediately."
+        data:
+          push:
+            interruption-level: time-sensitive
+  mode: single
+
+# --- Living Room ---
+
+- id: alert_co2_elevated_livingroom
+  alias: "Alert — Living Room CO2 Elevated (1000 ppm)"
+  description: Push notification when living room CO2 rises above 1000 ppm. Max once per hour.
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.livingroom_co2
+      above: 1000
+  conditions:
+    - condition: template
+      value_template: >
+        {{ (as_timestamp(now()) - as_timestamp(this.attributes.last_triggered | default('1970-01-01T00:00:00+00:00'))) > 3600 }}
+  actions:
+    - action: notify.notify
+      data:
+        title: "Air Quality — Living Room"
+        message: "CO2 is elevated at {{ states('sensor.livingroom_co2') | int }} ppm. Consider opening a window."
+  mode: single
+
+- id: alert_co2_urgent_livingroom
+  alias: "Alert — Living Room CO2 Urgent (1500 ppm)"
+  description: Urgent push notification when living room CO2 exceeds 1500 ppm. Max once per hour.
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.livingroom_co2
+      above: 1500
+  conditions:
+    - condition: template
+      value_template: >
+        {{ (as_timestamp(now()) - as_timestamp(this.attributes.last_triggered | default('1970-01-01T00:00:00+00:00'))) > 3600 }}
+  actions:
+    - action: notify.notify
+      data:
+        title: "⚠️ Air Quality — Living Room"
+        message: "CO2 is very high at {{ states('sensor.livingroom_co2') | int }} ppm. Open windows immediately."
+        data:
+          push:
+            interruption-level: time-sensitive
+  mode: single
+
+# --- Kitchen ---
+
+- id: alert_co2_elevated_kitchen
+  alias: "Alert — Kitchen CO2 Elevated (1000 ppm)"
+  description: Push notification when kitchen CO2 rises above 1000 ppm. Max once per hour.
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.kitchen_co2
+      above: 1000
+  conditions:
+    - condition: template
+      value_template: >
+        {{ (as_timestamp(now()) - as_timestamp(this.attributes.last_triggered | default('1970-01-01T00:00:00+00:00'))) > 3600 }}
+  actions:
+    - action: notify.notify
+      data:
+        title: "Air Quality — Kitchen"
+        message: "CO2 is elevated at {{ states('sensor.kitchen_co2') | int }} ppm. Consider opening a window."
+  mode: single
+
+- id: alert_co2_urgent_kitchen
+  alias: "Alert — Kitchen CO2 Urgent (1500 ppm)"
+  description: Urgent push notification when kitchen CO2 exceeds 1500 ppm. Max once per hour.
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.kitchen_co2
+      above: 1500
+  conditions:
+    - condition: template
+      value_template: >
+        {{ (as_timestamp(now()) - as_timestamp(this.attributes.last_triggered | default('1970-01-01T00:00:00+00:00'))) > 3600 }}
+  actions:
+    - action: notify.notify
+      data:
+        title: "⚠️ Air Quality — Kitchen"
+        message: "CO2 is very high at {{ states('sensor.kitchen_co2') | int }} ppm. Open windows immediately."
+        data:
+          push:
+            interruption-level: time-sensitive
+  mode: single

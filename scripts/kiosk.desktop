@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Application
+Name=Grafana Kiosk
+Exec=/home/pi/kiosk.sh

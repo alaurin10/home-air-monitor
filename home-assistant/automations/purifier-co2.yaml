@@ -1,0 +1,39 @@
+- id: purifier_co2_on
+  alias: "Living Room Purifier — Turn On (High CO2)"
+  description: >
+    Turns on the living room air purifier when CO2 in any room exceeds 1200 ppm.
+    At this level ventilation is noticeably poor — the purifier helps circulate air.
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.bedroom_co2
+      above: 1200
+    - trigger: numeric_state
+      entity_id: sensor.livingroom_co2
+      above: 1200
+    - trigger: numeric_state
+      entity_id: sensor.kitchen_co2
+      above: 1200
+  actions:
+    - action: switch.turn_on
+      target:
+        entity_id: switch.living_room_purifier
+  mode: single
+
+- id: purifier_co2_off
+  alias: "Living Room Purifier — Turn Off (CO2 Normalized)"
+  description: >
+    Turns off the living room air purifier once all rooms have been below 900 ppm
+    for 15 consecutive minutes. All three rooms must clear before turning off.
+  triggers:
+    - trigger: template
+      value_template: >
+        {{ states('sensor.bedroom_co2') | float(0) < 900
+           and states('sensor.livingroom_co2') | float(0) < 900
+           and states('sensor.kitchen_co2') | float(0) < 900 }}
+      for:
+        minutes: 15
+  actions:
+    - action: switch.turn_off
+      target:
+        entity_id: switch.living_room_purifier
+  mode: single

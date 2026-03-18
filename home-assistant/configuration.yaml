@@ -1,0 +1,24 @@
+homeassistant:
+  name: Home
+  unit_system: imperial
+  time_zone: America/Los_Angeles
+
+logger:
+  default: warning
+
+# InfluxDB v2 integration — writes air quality sensor data to time-series storage.
+# Prerequisite: create an API token in InfluxDB (Load Data → API Tokens → All Access)
+# and paste it below.
+influxdb:
+  api_version: 2
+  host: localhost
+  port: 8086
+  token: YOUR_INFLUXDB_API_TOKEN  # Replace with your token from the InfluxDB UI
+  organization: home
+  bucket: air_quality
+  include:
+    entity_globs:
+      - sensor.*_co2
+      - sensor.*_temperature
+      - sensor.*_humidity
+      - sensor.*_voc_index
