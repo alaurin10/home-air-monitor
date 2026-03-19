@@ -368,32 +368,34 @@ Default login: `admin` / `admin` — you'll be prompted to change the password.
 
 ### 5.4 Build your dashboard
 
-When you set up the GitHub project, Claude Code will generate a complete Grafana dashboard JSON that you can import directly. It will include:
+The project includes three importable dashboard JSON files in `grafana/`:
 
-- CO₂ gauges per room (color-coded: green < 800ppm, yellow < 1000ppm, red > 1000ppm)
-- Temperature per room (all on one graph)
-- Humidity per room
-- VOC index for the kitchen
-- Time-series graphs for the past 24 hours / 7 days
+| File | UID | Purpose |
+|---|---|---|
+| `wall-dashboard.json` | `air-quality-wall` | **Wall screen** — all sensors as real-time gauges with colored scales |
+| `history-dashboard.json` | `air-quality-history` | **Phone** — time-series history graphs for all sensors, default last 24h |
+| `dashboard.json` | `air-quality-monitor` | Combined view (gauges + graphs) — optional fallback |
 
-To import a dashboard JSON:
+**Import each dashboard:**
 
 1. Go to **Dashboards → Import**
-2. Paste the JSON or upload the file
-3. Select your InfluxDB data source
+2. Upload the JSON file (or paste its contents)
+3. When prompted, select your InfluxDB data source
 4. Click **Import**
+
+Repeat for each of the three files. You only need `wall-dashboard.json` and `history-dashboard.json` for day-to-day use.
 
 ### 5.5 Set Grafana to kiosk mode for the wall screen
 
 Kiosk mode hides the Grafana navigation bars for a clean full-screen look on the wall display.
 
-Add `?kiosk` to the dashboard URL when opening it on the Pi:
+The wall screen uses the `air-quality-wall` dashboard. Its kiosk URL is:
 
 ```
-http://localhost:3000/d/YOUR_DASHBOARD_ID/air-quality?kiosk
+http://localhost:3000/d/air-quality-wall/air-quality-wall?kiosk&theme=dark
 ```
 
-To auto-open this on boot, create a simple systemd service that launches Chromium in kiosk mode (full instructions in the GitHub project).
+The `scripts/kiosk.sh` file in this project is pre-configured with this URL and launches automatically on boot (see Phase 8).
 
 ---
 
@@ -455,13 +457,13 @@ Install the Tailscale app (iOS or Android) and sign into the same account.
 
 ### 7.3 Access Grafana remotely
 
-After both devices are connected, your Pi gets a stable Tailscale IP (e.g., `100.x.x.x`). Use that IP to access Grafana from anywhere:
+After both devices are connected, your Pi gets a stable Tailscale IP (e.g., `100.x.x.x`). Use the **history dashboard** on your phone to browse past readings:
 
 ```
-http://100.x.x.x:3000/d/YOUR_DASHBOARD_ID/air-quality?kiosk
+http://100.x.x.x:3000/d/air-quality-history
 ```
 
-Save this as a home screen shortcut on your phone for one-tap access.
+Save this as a home screen shortcut on your phone for one-tap access. Use the Grafana time picker in the top-right to switch between last 24h, 7 days, 30 days, etc.
 
 > **Privacy note:** Your sensor data never leaves your home network. Tailscale only coordinates the encrypted tunnel — it does not see or store your data.
 
@@ -480,52 +482,25 @@ sudo apt install -y \
   unclutter  # Hides the mouse cursor after inactivity
 ```
 
-### 8.2 Create an auto-start script
+### 8.2 Deploy the auto-start script
+
+The project includes pre-built `scripts/kiosk.sh` and `scripts/kiosk.desktop`. Copy them to the Pi:
 
 ```bash
-nano ~/kiosk.sh
-```
-
-```bash
-#!/bin/bash
-# Wait for Grafana to be ready
-sleep 30
-
-# Disable screen blanking
-xset s off
-xset s noblank
-xset -dpms
-
-# Hide mouse cursor after 1 second
-unclutter -idle 1 &
-
-# Open Grafana in kiosk mode
-chromium-browser \
-  --noerrdialogs \
-  --disable-infobars \
-  --kiosk \
-  "http://localhost:3000/d/YOUR_DASHBOARD_ID/air-quality?kiosk&theme=dark"
-```
-
-```bash
+cp scripts/kiosk.sh ~/kiosk.sh
 chmod +x ~/kiosk.sh
 ```
+
+`kiosk.sh` is pre-configured to open the wall dashboard (`air-quality-wall`) in full-screen kiosk mode. It waits 30 seconds for Grafana to start, disables screen blanking, and hides the cursor.
 
 ### 8.3 Run on boot
 
 ```bash
 mkdir -p ~/.config/autostart
-nano ~/.config/autostart/kiosk.desktop
+cp scripts/kiosk.desktop ~/.config/autostart/kiosk.desktop
 ```
 
-```ini
-[Desktop Entry]
-Type=Application
-Name=Grafana Kiosk
-Exec=/home/pi/kiosk.sh
-```
-
-Reboot — the dashboard should open automatically on the wall screen.
+Reboot — the wall dashboard should open automatically on the screen.
 
 ---
 
@@ -547,7 +522,9 @@ air-quality-monitor/
 │       ├── purifier-control.yaml
 │       └── co2-alerts.yaml
 ├── grafana/
-│   └── dashboard.json        # Importable dashboard
+│   ├── wall-dashboard.json   # Wall screen — real-time gauges
+│   ├── history-dashboard.json # Phone — historical time-series graphs
+│   └── dashboard.json        # Combined fallback dashboard
 └── scripts/
     └── kiosk.sh              # Wall screen auto-start
 ```

@@ -6,15 +6,14 @@ set -euo pipefail
 # Prerequisites (install on the Pi):
 #   sudo apt install -y xorg chromium-browser unclutter
 #
-# After importing the dashboard in Grafana, replace YOUR_DASHBOARD_ID
-# below with the actual dashboard UID (visible in the dashboard URL).
-# The default UID in dashboard.json is: air-quality-monitor
+# Wall screen shows real-time gauges (wall-dashboard.json, UID: air-quality-wall).
+# Phone history graphs are at: http://<tailscale-ip>:3000/d/air-quality-history
 #
 # Place this file at /home/pi/kiosk.sh and chmod +x it.
 # It is launched automatically by kiosk.desktop on login.
 
-DASHBOARD_UID="air-quality-monitor"
-GRAFANA_URL="http://localhost:3000/d/${DASHBOARD_UID}/air-quality?kiosk&theme=dark"
+DASHBOARD_UID="air-quality-wall"
+GRAFANA_URL="http://localhost:3000/d/${DASHBOARD_UID}/air-quality-wall?kiosk&theme=dark"
 
 # Wait for Grafana to finish starting up before opening the browser.
 echo "Waiting for Grafana to be ready..."
