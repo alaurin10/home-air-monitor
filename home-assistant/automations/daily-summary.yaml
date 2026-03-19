@@ -1,0 +1,41 @@
+# Daily air quality summary notification.
+# Sends a morning push at 08:00 with a recap of the past 24 hours:
+#   - Peak CO₂ per room
+#   - Current humidity per room
+#   - How long each purifier ran today
+#
+# Prerequisites: the statistics and history_stats sensors in configuration.yaml
+# must be active (restart HA after adding them, wait ~1 minute for values to populate).
+#
+# To test before 08:00 arrives: go to Settings → Automations → find this automation
+# → click the three-dot menu → Run.
+
+- id: daily_air_quality_summary
+  alias: "Daily Air Quality Summary"
+  description: >
+    Morning push notification with yesterday's peak CO₂ per room,
+    current humidity, and purifier runtime for the day.
+  triggers:
+    - trigger: time
+      at: "08:00:00"
+  actions:
+    - action: notify.notify
+      data:
+        title: "Air Quality Summary"
+        message: >
+          🌅 Good morning! Here's last night's air quality:
+
+          CO₂ peaks (24h):
+          • Bedroom: {{ states('sensor.bedroom_co2_daily_max') | int }} ppm
+          • Living Room: {{ states('sensor.livingroom_co2_daily_max') | int }} ppm
+          • Kitchen: {{ states('sensor.kitchen_co2_daily_max') | int }} ppm
+
+          Current humidity:
+          • Bedroom: {{ states('sensor.bedroom_humidity') | round(0) }}%
+          • Living Room: {{ states('sensor.livingroom_humidity') | round(0) }}%
+          • Kitchen: {{ states('sensor.kitchen_humidity') | round(0) }}%
+
+          Purifier runtime today:
+          • Kitchen: {{ states('sensor.kitchen_purifier_runtime_today') }}
+          • Living Room: {{ states('sensor.living_room_purifier_runtime_today') }}
+  mode: single

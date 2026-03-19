@@ -1,0 +1,88 @@
+# CO₂ rapid-rise alerts.
+# Triggers when CO₂ is climbing faster than 20 ppm/min (= ~200 ppm over 10 minutes).
+# This catches a deteriorating situation before it crosses the static 1000 ppm threshold.
+#
+# Prerequisite: the derivative sensors in configuration.yaml must be active.
+# After adding them, restart Home Assistant and wait a few minutes for values to populate.
+#
+# Threshold: 20 ppm/min. Adjust to taste — lower = more sensitive, higher = fewer alerts.
+# Cooldown: 30 minutes per room (more frequent than static alerts since rapid rise is actionable).
+
+- id: rapid_rise_bedroom
+  alias: "Alert — Bedroom CO2 Rising Fast"
+  description: >
+    Notifies when bedroom CO2 is climbing at more than 20 ppm/min.
+    Triggers before the static 1000 ppm threshold is reached.
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.bedroom_co2_rate
+      above: 20
+  conditions:
+    - condition: numeric_state
+      entity_id: sensor.bedroom_co2
+      above: 600  # Ignore rate spikes at very low baseline readings
+    - condition: template
+      value_template: >
+        {{ (as_timestamp(now()) - as_timestamp(this.attributes.last_triggered | default('1970-01-01T00:00:00+00:00'))) > 1800 }}
+  actions:
+    - action: notify.notify
+      data:
+        title: "CO₂ Rising — Bedroom"
+        message: >
+          CO₂ in the bedroom is rising quickly
+          ({{ states('sensor.bedroom_co2_rate') | round(0) }} ppm/min,
+          currently {{ states('sensor.bedroom_co2') | int }} ppm).
+          Consider opening a window.
+  mode: single
+
+- id: rapid_rise_livingroom
+  alias: "Alert — Living Room CO2 Rising Fast"
+  description: >
+    Notifies when living room CO2 is climbing at more than 20 ppm/min.
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.livingroom_co2_rate
+      above: 20
+  conditions:
+    - condition: numeric_state
+      entity_id: sensor.livingroom_co2
+      above: 600
+    - condition: template
+      value_template: >
+        {{ (as_timestamp(now()) - as_timestamp(this.attributes.last_triggered | default('1970-01-01T00:00:00+00:00'))) > 1800 }}
+  actions:
+    - action: notify.notify
+      data:
+        title: "CO₂ Rising — Living Room"
+        message: >
+          CO₂ in the living room is rising quickly
+          ({{ states('sensor.livingroom_co2_rate') | round(0) }} ppm/min,
+          currently {{ states('sensor.livingroom_co2') | int }} ppm).
+          Consider opening a window.
+  mode: single
+
+- id: rapid_rise_kitchen
+  alias: "Alert — Kitchen CO2 Rising Fast"
+  description: >
+    Notifies when kitchen CO2 is climbing at more than 20 ppm/min.
+  triggers:
+    - trigger: numeric_state
+      entity_id: sensor.kitchen_co2_rate
+      above: 20
+  conditions:
+    - condition: numeric_state
+      entity_id: sensor.kitchen_co2
+      above: 600
+    - condition: template
+      value_template: >
+        {{ (as_timestamp(now()) - as_timestamp(this.attributes.last_triggered | default('1970-01-01T00:00:00+00:00'))) > 1800 }}
+  actions:
+    - action: notify.notify
+      data:
+        title: "CO₂ Rising — Kitchen"
+        message: >
+          CO₂ in the kitchen is rising quickly
+          ({{ states('sensor.kitchen_co2_rate') | round(0) }} ppm/min,
+          currently {{ states('sensor.kitchen_co2') | int }} ppm).
+          Consider opening a window or turning on ventilation.
+  mode: single

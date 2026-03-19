@@ -436,6 +436,51 @@
     }
 
   ],
+    { "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 27 }, "id": 103, "title": "Outdoor Air Quality", "type": "row" },
+
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "description": "Outdoor AQI from OpenWeatherMap (scale 1–5: 1=Good, 2=Fair, 3=Moderate, 4=Poor, 5=Very Poor). Requires the OpenWeatherMap integration in Home Assistant — see SOFTWARE.md Phase 9.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [
+            { "options": { "1": { "text": "Good" }, "2": { "text": "Fair" }, "3": { "text": "Moderate" }, "4": { "text": "Poor" }, "5": { "text": "Very Poor" } }, "type": "value" }
+          ],
+          "min": 1, "max": 5,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 3 },
+              { "color": "red", "value": 4 }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 28 },
+      "id": 11,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showThresholdLabels": true,
+        "showThresholdMarkers": true,
+        "text": { "titleSize": 16, "valueSize": 40 }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"air_quality\")\n  |> range(start: -15m)\n  |> filter(fn: (r) => r._measurement == \"state\")\n  |> filter(fn: (r) => r.entity_id == \"openweathermap_air_quality_index\")\n  |> filter(fn: (r) => r._field == \"value\")\n  |> last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Outdoor AQI",
+      "type": "gauge"
+    }
+
+  ],
   "refresh": "1m",
   "schemaVersion": 38,
   "tags": ["air-quality", "wall"],

@@ -1,0 +1,60 @@
+# Sensor offline detection.
+# Sends a push notification if any ESP32 sensor node stops reporting for 5 minutes.
+# This catches WiFi drops, power failures, or firmware crashes.
+#
+# The trigger watches the CO2 entity from each node — if the whole node is offline,
+# all its sensors go unavailable simultaneously.
+
+- id: sensor_offline_bedroom
+  alias: "Sensor Health — Bedroom Node Offline"
+  description: Alert if bedroom sensor stops reporting for 5 minutes.
+  triggers:
+    - trigger: state
+      entity_id: sensor.bedroom_co2
+      to: "unavailable"
+      for:
+        minutes: 5
+  actions:
+    - action: notify.notify
+      data:
+        title: "Sensor Offline — Bedroom"
+        message: >
+          The bedroom sensor node has not reported in over 5 minutes.
+          Check that it is powered on and connected to WiFi.
+  mode: single
+
+- id: sensor_offline_livingroom
+  alias: "Sensor Health — Living Room Node Offline"
+  description: Alert if living room sensor stops reporting for 5 minutes.
+  triggers:
+    - trigger: state
+      entity_id: sensor.livingroom_co2
+      to: "unavailable"
+      for:
+        minutes: 5
+  actions:
+    - action: notify.notify
+      data:
+        title: "Sensor Offline — Living Room"
+        message: >
+          The living room sensor node has not reported in over 5 minutes.
+          Check that it is powered on and connected to WiFi.
+  mode: single
+
+- id: sensor_offline_kitchen
+  alias: "Sensor Health — Kitchen Node Offline"
+  description: Alert if kitchen sensor stops reporting for 5 minutes.
+  triggers:
+    - trigger: state
+      entity_id: sensor.kitchen_co2
+      to: "unavailable"
+      for:
+        minutes: 5
+  actions:
+    - action: notify.notify
+      data:
+        title: "Sensor Offline — Kitchen"
+        message: >
+          The kitchen sensor node has not reported in over 5 minutes.
+          Check that it is powered on and connected to WiFi.
+  mode: single

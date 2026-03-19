@@ -543,6 +543,90 @@ When you open the project in Claude Code, use these prompts as a starting point:
 
 ---
 
+## Phase 9 — Additional features
+
+### 9.1 Sensor offline detection
+
+**Files:** `home-assistant/automations/sensor-health.yaml`
+
+No extra setup needed. Import the automation file in HA (**Settings → Automations → ⋮ → Import**). Each node sends a push notification if it stops reporting for 5 minutes.
+
+To test: unplug a sensor node, wait 5 minutes, check for notification.
+
+---
+
+### 9.2 CO₂ rapid-rise alerts
+
+**Files:** `home-assistant/automations/rapid-rise-alerts.yaml`, `home-assistant/configuration.yaml`
+
+The `derivative:` sensors in `configuration.yaml` must be active before the automations will work.
+
+1. Copy the updated `configuration.yaml` to your Pi (merge with existing if needed)
+2. Restart Home Assistant (**Settings → System → Restart**)
+3. Wait 2–3 minutes, then check **Settings → Developer Tools → States** and search for `co2_rate` — you should see three derivative sensors with values
+4. Import `rapid-rise-alerts.yaml`
+
+Alert triggers when CO₂ rises faster than 20 ppm/min. Adjust the threshold in the automation if too noisy.
+
+---
+
+### 9.3 Wall screen night mode
+
+**Files:** `home-assistant/automations/night-mode.yaml`, `home-assistant/configuration.yaml`
+
+The `shell_command:` block in `configuration.yaml` must be active. HA uses `vcgencmd` to control the HDMI output — this requires the HA process user to be in the `video` group on the Pi:
+
+```bash
+sudo usermod -aG video pi
+sudo reboot
+```
+
+After rebooting, reload the HA configuration, then import `night-mode.yaml`. The screen will turn off at 23:00 and back on at 07:00. Edit the times in the automation to match your schedule.
+
+To test manually: **Settings → Developer Tools → Services → shell_command.screen_off → Call Service**.
+
+---
+
+### 9.4 Sonoff S31 power monitoring
+
+**Files:** `home-assistant/configuration.yaml`, `grafana/history-dashboard.json`
+
+Tasmota automatically exposes wattage as MQTT sensors. After Tasmota is set up (Phase 6.1), the S31 power entities should auto-appear in HA. Verify the exact entity IDs:
+
+1. In HA, go to **Settings → Devices & Services → Entities**
+2. Search for your plug's device name — you'll see entities like `sensor.{name}_power`
+3. If the names differ from `sensor.kitchen_purifier_power` / `sensor.living_room_purifier_power`, update the Flux queries in `history-dashboard.json` accordingly
+
+The updated `configuration.yaml` already includes `sensor.*_power` in the InfluxDB include filter, so data will flow automatically once HA restarts.
+
+---
+
+### 9.5 Outdoor air quality
+
+**Files:** `home-assistant/configuration.yaml`, `grafana/wall-dashboard.json`
+
+Requires a free OpenWeatherMap API key:
+
+1. Sign up at [openweathermap.org](https://openweathermap.org/api) — the free tier is sufficient
+2. In HA, go to **Settings → Integrations → Add Integration → OpenWeatherMap**
+3. Enter your API key, set your location
+4. HA will create entities including `sensor.openweathermap_air_quality_index`
+5. Re-import `wall-dashboard.json` — the Outdoor AQI gauge will populate automatically
+
+The AQI scale is 1–5 (EU standard): 1 = Good, 2 = Fair, 3 = Moderate, 4 = Poor, 5 = Very Poor.
+
+---
+
+### 9.6 Daily summary notification
+
+**Files:** `home-assistant/automations/daily-summary.yaml`, `home-assistant/configuration.yaml`
+
+Requires the `statistics:` and `history_stats:` sensors in `configuration.yaml` to be active (same restart as step 9.2). After HA restarts, import `daily-summary.yaml`. A notification will arrive at 08:00 each morning with yesterday's peak CO₂ and purifier runtime.
+
+To test immediately: **Settings → Automations → Daily Air Quality Summary → ⋮ → Run**.
+
+---
+
 ## Calibration tips
 
 After everything is running, give the sensors 24–48 hours to stabilize before trusting the readings.

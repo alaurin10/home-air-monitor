@@ -1,0 +1,31 @@
+# Wall screen night mode.
+# Turns the HDMI display off at night to avoid light pollution and save power,
+# then turns it back on in the morning.
+#
+# Prerequisites:
+#   1. The shell_command block must be present in configuration.yaml (already added).
+#   2. The Pi user must be in the 'video' group for vcgencmd to work:
+#        sudo usermod -aG video pi
+#      Then restart Home Assistant (not just reload config).
+#
+# Adjust the times below to match your schedule.
+
+- id: screen_night_off
+  alias: "Wall Screen — Turn Off at Night"
+  description: Turns off the HDMI display at 23:00 to reduce light in the room.
+  triggers:
+    - trigger: time
+      at: "23:00:00"
+  actions:
+    - action: shell_command.screen_off
+  mode: single
+
+- id: screen_morning_on
+  alias: "Wall Screen — Turn On in Morning"
+  description: Turns the HDMI display back on at 07:00.
+  triggers:
+    - trigger: time
+      at: "07:00:00"
+  actions:
+    - action: shell_command.screen_on
+  mode: single
